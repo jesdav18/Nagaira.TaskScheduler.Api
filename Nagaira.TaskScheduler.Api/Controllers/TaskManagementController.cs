@@ -12,9 +12,9 @@ namespace Nagaira.TaskScheduler.Api.Controllers
     public class TaskManagementController : ControllerBase
     {
         private readonly TaskManagementAppService _taskManagementAppService;
-        private readonly ConfigurationApp _configurationApp;
+        private readonly GlobalEnvironmentDto _configurationApp;
 
-        public TaskManagementController(TaskManagementAppService taskManagementAppService, ConfigurationApp configurationApp)
+        public TaskManagementController(TaskManagementAppService taskManagementAppService, GlobalEnvironmentDto configurationApp)
         {
             _taskManagementAppService = taskManagementAppService;
             _configurationApp = configurationApp;
