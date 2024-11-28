@@ -47,10 +47,6 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
-          # Agregar la clave pública del servidor al archivo known_hosts
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
-    
           # Crear el directorio de despliegue temporal
           mkdir -p /tmp/deploy
           cp -r out/* /tmp/deploy/
