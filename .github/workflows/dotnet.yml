@@ -61,6 +61,7 @@ jobs:
         port: 2222
         source: "/home/runner/work/Nagaira.TaskScheduler.Api/Nagaira.TaskScheduler.Api/out/*"
         target: ${{ secrets.VPS_API_PATH }}
+        overwrite: true
         
 
 
