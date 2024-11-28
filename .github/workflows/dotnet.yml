@@ -39,31 +39,33 @@ jobs:
     # Paso 7: Desplegar a tu VPS
     - name: Deploy to VPS
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}   # Usamos el secreto SSH
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Secreto de la clave privada SSH
         VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
         VPS_IP: ${{ secrets.VPS_IP }}
         VPS_API_PATH: ${{ secrets.VPS_API_PATH }}
       run: |
+        # Paso 7.1: Crear el directorio de despliegue temporal
         mkdir -p /tmp/deploy
         cp -r out/* /tmp/deploy/
-        
-        # Crear el directorio .ssh si no existe
+
+        # Paso 7.2: Configuración del SSH (agregar la clave privada al agente SSH)
         mkdir -p ~/.ssh
-
-        # Guardar la clave privada en ~/.ssh/id_rsa
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-
-        # Establecer permisos para la clave privada
+        echo "$SSH_PRIVATE_KEY" | tee ~/.ssh/id_rsa > /dev/null
+        chmod 700 ~/.ssh
         chmod 600 ~/.ssh/id_rsa
 
-        # Verificar la conexión SSH (debug)
-        ssh -v -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "echo Connection successful"
+        # Paso 7.3: Iniciar el ssh-agent y agregar la clave privada
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/id_rsa
 
-        # Crear carpeta de destino en el VPS
-        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
+        # Paso 7.4: Verificar la conexión SSH (usando ssh-agent)
+        ssh -v -p 2222 $VPS_USERNAME@$VPS_IP "echo Connection successful"
+
+        # Paso 7.5: Crear la carpeta en el VPS para la API
+        ssh -p 2222 $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
         
-        # Subir los archivos al VPS
-        scp -P 2222 -i ~/.ssh/id_rsa -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
+        # Paso 7.6: Subir los archivos al VPS
+        scp -P 2222 -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
         
-        # Iniciar servicio en el VPS
-        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "sudo systemctl start api-task-scheduler.service"
+        # Paso 7.7: Reiniciar o iniciar el servicio en el VPS
+        ssh -p 2222 $VPS_USERNAME@$VPS_IP "sudo systemctl restart api-task-scheduler.service"
