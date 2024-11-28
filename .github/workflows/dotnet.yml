@@ -60,6 +60,9 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p 2222 ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+        
           # Subir los archivos generados al VPS
           rsync -avz -e "ssh -p 2222" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }} --verbose
 
