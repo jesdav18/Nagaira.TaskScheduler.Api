@@ -44,6 +44,7 @@ jobs:
         host: ${{ secrets.VPS_IP }}  # Dirección IP del VPS
         username: ${{ secrets.VPS_USERNAME }}  # Usuario SSH
         key: ${{ secrets.SSH_PRIVATE_KEY }}  # Clave privada SSH (almacenada en los secretos)
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222  # Puerto SSH
         script: |
           # Crear el directorio de despliegue temporal
