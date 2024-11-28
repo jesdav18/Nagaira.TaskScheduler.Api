@@ -60,8 +60,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
-        source: "${{ secrets.VPS_API_PATH }}/*"
-        target: "/var/www/nagaira.com/apis/backups/task-scheduler/backup_${{ env.BACKUP_TIMESTAMP }}/"
+        source: "${{ secrets.VPS_API_PATH }}*"
+        target: "/var/www/nagaira.com/apis/backups/task-scheduler/backup_${{ env.BACKUP_TIMESTAMP }}"
         overwrite: false # No sobrescribir los archivos en el backup
 
     # Paso 9: Listar los archivos publicados
