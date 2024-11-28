@@ -50,13 +50,13 @@ jobs:
 
         # Paso 7.2: Configuración del SSH (agregar la clave privada al agente SSH)
         mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" | tee ~/.ssh/id_rsa > /dev/null
+        echo "$SSH_PRIVATE_KEY" | tee ~/.ssh/nagaira_ssh_pair > /dev/null
         chmod 700 ~/.ssh
-        chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/nagaira_ssh_pair
 
         # Paso 7.3: Iniciar el ssh-agent y agregar la clave privada
         eval $(ssh-agent -s)
-        ssh-add ~/.ssh/id_rsa
+        ssh-add ~/.ssh/nagaira_ssh_pair
 
         # Paso 7.4: Verificar la conexión SSH (usando ssh-agent)
         ssh -v -p 2222 $VPS_USERNAME@$VPS_IP "echo Connection successful"
