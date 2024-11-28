@@ -51,7 +51,7 @@ jobs:
       run: ls -l out
 
     - name: Copy to Remote Server
-      uses: pierrickdelrieu/scp-action@v0.1.0
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.VPS_IP }}  # Dirección IP del servidor
         ssh_port: 2222  # Puerto SSH (usualmente 22, pero tú usas 2222)
