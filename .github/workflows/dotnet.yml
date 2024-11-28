@@ -60,11 +60,9 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
-          # Crear el directorio de despliegue temporal en el VPS
-          mkdir -p /tmp/deploy
-
           # Subir los archivos generados al VPS
-          rsync -avz -e "ssh -p 2222" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
+          rsync -avz -e "ssh -p 2222" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }} --verbose
+
 
           # Reiniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
