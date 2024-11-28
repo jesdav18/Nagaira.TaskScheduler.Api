@@ -50,18 +50,18 @@ jobs:
     - name: List Published Files
       run: ls -l out
 
-    # Paso 8: Desplegar a tu VPS usando SSH
-    - name: Deploy to VPS via SSH
-      uses: appleboy/ssh-action@v1.0.0
+    - name: Copy to Remote Server
+      uses: pierrickdelrieu/scp-action@v0.1.0
       with:
-        host: ${{ secrets.VPS_IP }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222
-        script: |      
-          # Subir los archivos generados al VPS
-          scp -P 2222 -i -r out/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
+        host: ${{ secrets.VPS_IP }}  # Dirección IP del servidor
+        ssh_port: 2222  # Puerto SSH (usualmente 22, pero tú usas 2222)
+        ssh_username: ${{ secrets.VPS_USERNAME }}  # Nombre de usuario SSH
+        ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}  # Clave SSH privada almacenada en los secretos
+        ssh_passphrase: ${{ secrets.SSH_PASSPHRASE }}  # Passphrase de la clave, si aplica
+        source_dir: out/  # Directorio local donde se encuentran los archivos generados
+        destination_dir: ${{ secrets.VPS_API_PATH }}  # Ruta en el VPS donde se deben copiar los archivos
+        rm: true  # Eliminar archivos después de copiarlos (opcional)
 
-          # Reiniciar el servicio en el VPS
-          sudo systemctl restart api-task-scheduler.service
+    - name: Restart service on VPS
+      run: sudo systemctl restart api-task-scheduler.service
+
