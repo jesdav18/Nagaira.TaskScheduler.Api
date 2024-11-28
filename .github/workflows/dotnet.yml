@@ -47,9 +47,14 @@ jobs:
         mkdir -p /tmp/deploy
         cp -r out/* /tmp/deploy/
         
-        # Guardar la clave privada en un archivo temporal
+        # Crear el directorio .ssh si no existe
+        mkdir -p ~/.ssh
+
+        # Guardar la clave privada en ~/.ssh/id_rsa
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa  # Cambiar permisos de la clave para que sea accesible solo para el usuario
+
+        # Establecer permisos para la clave privada
+        chmod 600 ~/.ssh/id_rsa
 
         # Verificar la conexión SSH (debug)
         ssh -v -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "echo Connection successful"
