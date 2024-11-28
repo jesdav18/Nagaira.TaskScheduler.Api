@@ -38,19 +38,37 @@ jobs:
       run: |
         set -e
         dotnet publish -c Release -o out
-            # Listar los archivos generados
-            echo "Archivos publicados:"
-            ls -l out
-            if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
-              echo "Error: Publicación fallida. El directorio 'out/' está vacío."
-              exit 1
-            fi
+        # Listar los archivos generados
+        echo "Archivos publicados:"
+        ls -l out
+        if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
+          echo "Error: Publicación fallida. El directorio 'out/' está vacío."
+          exit 1
+        fi
 
-    # Paso 7: Listar los archivos publicados
+    # Paso 7: Crear timestamp para el backup
+    - name: Create backup timestamp
+      id: timestamp
+      run: echo "BACKUP_TIMESTAMP=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
+
+    # Paso 8: Hacer un backup de los archivos previos en el VPS con timestamp
+    - name: Backup previous files on VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        port: 2222
+        source: "${{ secrets.VPS_API_PATH }}/*"
+        target: "/var/www/nagaira.com/apis/backups/task-scheduler/backup_${{ env.BACKUP_TIMESTAMP }}/"
+        overwrite: false # No sobrescribir los archivos en el backup
+
+    # Paso 9: Listar los archivos publicados
     - name: List Published Files
       run: ls -l out
 
-    # Paso 8: Desplegar a tu VPS usando SSH
+    # Paso 10: Desplegar a tu VPS usando SSH
     - name: Deploy to VPS via SSH
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -61,7 +79,5 @@ jobs:
         port: 2222
         source: "/home/runner/work/Nagaira.TaskScheduler.Api/Nagaira.TaskScheduler.Api/out/*"
         target: ${{ secrets.VPS_API_PATH }}
+        rm: true
         overwrite: true
-        
-
-
