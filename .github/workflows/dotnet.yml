@@ -59,14 +59,9 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
-        script: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
-      
+        script: |      
           # Subir los archivos generados al VPS
-          rsync -avz -e "ssh -p 2222 -i /tmp/id_rsa" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
+          scp -P 2222 -i /tmp/id_rsa -r out/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
 
-          rm -f /tmp/id_rsa
-          
           # Reiniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
