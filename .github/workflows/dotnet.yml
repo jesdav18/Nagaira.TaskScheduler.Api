@@ -46,25 +46,21 @@ jobs:
               exit 1
             fi
 
-    - name: Setup SSH key
-      run: |
-        mkdir -p ~/.ssh
-        # Escribe el secreto SSH directamente en el archivo, incluyendo saltos de línea
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/nagaira_ssh_pair
-        chmod 600 ~/.ssh/nagaira_ssh_pair
-        ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+    # Paso 7: Listar los archivos publicados
+    - name: List Published Files
+      run: ls -l out
 
-      # Paso 7: Desplegar a tu VPS usando SSH
+    # Paso 8: Desplegar a tu VPS usando SSH
     - name: Deploy to VPS via SSH
-      uses: appleboy/ssh-action@v1.0.0
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.VPS_IP }}
         username: ${{ secrets.VPS_USERNAME }}
-        key: ~/.ssh/nagaira_ssh_pair
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
-        script: |
-          # Subir los archivos generados al VPS
-          scp -P 2222 -r ./out/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
-          # Reiniciar el servicio en el VPS
-          sudo systemctl restart api-task-scheduler.service
+        source: "/out"
+        target: ${{ secrets.VPS_API_PATH }}
+        
+
+
