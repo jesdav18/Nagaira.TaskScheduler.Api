@@ -47,15 +47,17 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
-          # Crear el directorio de despliegue temporal
-          mkdir -p /tmp/deploy
-          cp -r out/* /tmp/deploy/
-    
-          # Crear la carpeta de destino en el VPS
+          # Validar que el directorio de despliegue existe
+          if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
+            echo "Error: El directorio 'out/' no existe o está vacío."
+            exit 1
+          fi
+          
+          # Crear el directorio de destino en el VPS
           mkdir -p ${{ secrets.VPS_API_PATH }}
-    
-          # Subir los archivos al VPS
-          scp -P 2222 -r /tmp/deploy/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
-    
-          # Reiniciar o iniciar el servicio en el VPS
+
+          # Subir los archivos generados al VPS
+          rsync -avz -e "ssh -p 2222" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
+
+          # Reiniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
