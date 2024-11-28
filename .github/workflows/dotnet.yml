@@ -38,10 +38,13 @@ jobs:
       run: |
         set -e
         dotnet publish -c Release -o out
-        if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
-          echo "Error: Publicación fallida. El directorio 'out/' está vacío."
-          exit 1
-        fi
+            # Listar los archivos generados
+            echo "Archivos publicados:"
+            ls -l out
+            if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
+              echo "Error: Publicación fallida. El directorio 'out/' está vacío."
+              exit 1
+            fi
 
     # Paso 7: Listar los archivos publicados
     - name: List Published Files
