@@ -1,0 +1,51 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Paso 1: Checkout del código
+    - uses: actions/checkout@v4
+
+    # Paso 2: Configurar .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Paso 3: Restaurar dependencias
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Paso 4: Construir el proyecto
+    - name: Build
+      run: dotnet build --no-restore
+
+    # Paso 5: Ejecutar pruebas
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    # Paso 6: Publicar la aplicación
+    - name: Publish
+      run: dotnet publish -c Release -o out
+
+    # Paso 7: Desplegar a tu VPS
+    - name: Deploy to VPS
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+        VPS_IP: ${{ secrets.VPS_IP }}
+        VPS_API_PATH: ${{ secrets.VPS_API_PATH }}
+      run: |
+        mkdir -p /tmp/deploy
+        cp -r out/* /tmp/deploy/
+        ssh -p 2222 -i ~/.ssh/nagaira_ssh_pair $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
+        scp -P 2222 -i ~/.ssh/nagaira_ssh_pair -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
+        ssh -p 2222 -i ~/.ssh/nagaira_ssh_pair $VPS_USERNAME@$VPS_IP "sudo systemctl start api-task-scheduler.service"
