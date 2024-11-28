@@ -41,21 +41,25 @@ jobs:
     - name: Deploy to VPS via SSH
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.VPS_IP }}  # Dirección IP del VPS
-        username: ${{ secrets.VPS_USERNAME }}  # Usuario SSH
-        key: ${{ secrets.SSH_PRIVATE_KEY }}  # Clave privada SSH (almacenada en los secretos)
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222  # Puerto SSH
+        port: 2222
         script: |
+          # Agregar la clave pública del servidor al archivo known_hosts
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
+    
           # Crear el directorio de despliegue temporal
           mkdir -p /tmp/deploy
           cp -r out/* /tmp/deploy/
-
+    
           # Crear la carpeta de destino en el VPS
           mkdir -p ${{ secrets.VPS_API_PATH }}
-
+    
           # Subir los archivos al VPS
           scp -P 2222 -r /tmp/deploy/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
-
+    
           # Reiniciar o iniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
