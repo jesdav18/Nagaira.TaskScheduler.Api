@@ -60,12 +60,13 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p 2222 ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
-        
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+      
           # Subir los archivos generados al VPS
-          rsync -avz -e "ssh -p 2222" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }} --verbose
+          rsync -avz -e "ssh -p 2222 -i /tmp/id_rsa" out/ ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
 
-
+          rm -f /tmp/id_rsa
+          
           # Reiniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
