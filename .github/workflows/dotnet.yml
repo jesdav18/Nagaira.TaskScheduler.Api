@@ -36,25 +36,29 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -o out
 
-    # Paso 7: Configurar la clave privada SSH
-    - name: Setup SSH Key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-
-    # Paso 8: Desplegar a tu VPS
+    # Paso 7: Desplegar a tu VPS
     - name: Deploy to VPS
       env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}   # Usamos el secreto SSH
         VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
         VPS_IP: ${{ secrets.VPS_IP }}
         VPS_API_PATH: ${{ secrets.VPS_API_PATH }}
       run: |
-        # Crear carpeta temporal para el despliegue
         mkdir -p /tmp/deploy
         cp -r out/* /tmp/deploy/
         
-        # Crear directorio remoto, transferir archivos y reiniciar servicio
+        # Guardar la clave privada en un archivo temporal
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa  # Cambiar permisos de la clave para que sea accesible solo para el usuario
+
+        # Verificar la conexión SSH (debug)
+        ssh -v -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "echo Connection successful"
+
+        # Crear carpeta de destino en el VPS
         ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
+        
+        # Subir los archivos al VPS
         scp -P 2222 -i ~/.ssh/id_rsa -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
-        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "sudo systemctl restart api-task-scheduler.service"
+        
+        # Iniciar servicio en el VPS
+        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "sudo systemctl start api-task-scheduler.service"
