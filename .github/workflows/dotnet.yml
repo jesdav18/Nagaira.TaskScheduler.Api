@@ -60,7 +60,7 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         local: "/home/runner/work/Nagaira.TaskScheduler.Api/Nagaira.TaskScheduler.Api/out"
-        target: ${{ secrets.VPS_API_PATH }}
+        remote: ${{ secrets.VPS_API_PATH }}
         
 
 
