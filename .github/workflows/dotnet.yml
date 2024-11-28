@@ -57,12 +57,6 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
-          # Validar que el directorio 'out' exista antes de continuar
-          if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
-            echo "Error: El directorio 'out/' no existe o está vacío."
-            exit 1
-          fi
-
           # Crear el directorio de despliegue temporal en el VPS
           mkdir -p /tmp/deploy
 
