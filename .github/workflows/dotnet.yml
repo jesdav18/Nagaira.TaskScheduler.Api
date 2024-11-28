@@ -36,16 +36,25 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -o out
 
-    # Paso 7: Desplegar a tu VPS
+    # Paso 7: Configurar la clave privada SSH
+    - name: Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    # Paso 8: Desplegar a tu VPS
     - name: Deploy to VPS
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
         VPS_IP: ${{ secrets.VPS_IP }}
         VPS_API_PATH: ${{ secrets.VPS_API_PATH }}
       run: |
+        # Crear carpeta temporal para el despliegue
         mkdir -p /tmp/deploy
         cp -r out/* /tmp/deploy/
-        ssh -p 2222 -i ~/.ssh/nagaira_ssh_pair $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
-        scp -P 2222 -i ~/.ssh/nagaira_ssh_pair -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
-        ssh -p 2222 -i ~/.ssh/nagaira_ssh_pair $VPS_USERNAME@$VPS_IP "sudo systemctl start api-task-scheduler.service"
+        
+        # Crear directorio remoto, transferir archivos y reiniciar servicio
+        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "mkdir -p $VPS_API_PATH"
+        scp -P 2222 -i ~/.ssh/id_rsa -r /tmp/deploy/* $VPS_USERNAME@$VPS_IP:$VPS_API_PATH
+        ssh -p 2222 -i ~/.ssh/id_rsa $VPS_USERNAME@$VPS_IP "sudo systemctl restart api-task-scheduler.service"
