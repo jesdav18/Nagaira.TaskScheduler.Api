@@ -61,7 +61,7 @@ jobs:
         port: 2222
         script: |      
           # Subir los archivos generados al VPS
-          scp -P 2222 -i /tmp/id_rsa -r out/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
+          scp -P 2222 -i -r out/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }}:${{ secrets.VPS_API_PATH }}
 
           # Reiniciar el servicio en el VPS
           sudo systemctl restart api-task-scheduler.service
