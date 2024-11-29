@@ -45,21 +45,13 @@ jobs:
           exit 1
         fi
 
-    # Paso 7: Realizar backup de los archivos actuales en el servidor
-    - name: Backup existing files on VPS
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.VPS_IP }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222
-        source: ${{ secrets.VPS_API_PATH }}/*
-        target: "/var/www/nagaira.com/apis/backups/task-scheduler/$(date +'%Y%m%d_%H%M%S')/"
-        overwrite: false
+    # Paso 7: Backup de los archivos actuales en el servidor
+    - name: Backup existing files
+      run: |
+        ssh -p 2222 -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_IP }} "mkdir -p /var/www/nagaira.com/apis/backups/task-scheduler && cp -r ${{ secrets.VPS_API_PATH }}/* /var/www/nagaira.com/apis/backups/task-scheduler/$(date +'%Y%m%d_%H%M%S')/"
 
-    # Paso 8: Desplegar a tu VPS usando SSH
-    - name: Deploy to VPS via SSH
+    # Paso 8: Desplegar a tu VPS usando SCP
+    - name: Deploy to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.VPS_IP }}
