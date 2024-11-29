@@ -115,7 +115,7 @@ namespace Nagaira.TaskScheduler.Api
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    var ambiente = env.IsProduction() ? "Producción......................................." : "Desarrollo";
+                    var ambiente = env.IsProduction() ? "Prod | Nagaira" : "Desarrollo";
                     await context.Response.WriteAsync($"<b>Nagaira TaskScheduler Api | {ambiente}</b><hr>");
                 });
                 endpoints.MapControllers();
