@@ -114,6 +114,8 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 2222
         script: |
+          echo "Deteniendo el servicio api-task-scheduler.service..."
+          sudo systemctl stop api-task-scheduler.service
           echo "Reiniciando el servicio api-task-scheduler.service..."
           sudo systemctl start api-task-scheduler.service
           echo "Servicio reiniciado correctamente."
