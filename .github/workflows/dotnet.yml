@@ -103,3 +103,17 @@ jobs:
             echo "Error: El directorio $FINAL_DIR está vacío después del movimiento."
             exit 1
           fi
+
+    # Paso 10: Reiniciar el servicio en el VPS
+    - name: Restart API Service
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        port: 2222
+        script: |
+          echo "Reiniciando el servicio api-task-scheduler.service..."
+          sudo systemctl start api-task-scheduler.service
+          echo "Servicio reiniciado correctamente."
