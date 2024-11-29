@@ -50,6 +50,7 @@ jobs:
       with:
        host: ${{ secrets.VPS_IP  }}
        username: ${{ secrets.VPS_USERNAME }}
+       passphrase: ${{ secrets.SSH_PASSPHRASE }}
        key: ${{ secrets.SSH_PRIVATE_KEY }}
        port: 2222
        script: |
