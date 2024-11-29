@@ -38,7 +38,6 @@ jobs:
       run: |
         set -e
         dotnet publish -c Release -o out
-        # Listar los archivos generados
         echo "Archivos publicados:"
         ls -l out
         if [ ! -d "out" ] || [ -z "$(ls -A out)" ]; then
@@ -57,7 +56,7 @@ jobs:
         port: 2222
         source: ${{ secrets.VPS_API_PATH }}/*
         target: "/var/www/nagaira.com/apis/backups/task-scheduler/$(date +'%Y%m%d_%H%M%S')/"
-        recursive: true
+        overwrite: false
 
     # Paso 8: Desplegar a tu VPS usando SSH
     - name: Deploy to VPS via SSH
