@@ -48,10 +48,10 @@ jobs:
     - name: Backup existing files
       uses: appleboy/ssh-action@v1.2.0
       with:
-       host: ${{ secrets.HOST }}
+       host: ${{ secrets.VPS_IP  }}
        username: ${{ secrets.VPS_USERNAME }}
-       password: ${{ secrets.PASSWORD }}
-       port: ${{ secrets.PORT }}
+       key: ${{ secrets.SSH_PRIVATE_KEY }}
+       port: 2222
        script: |
         BACKUP_DIR="/var/www/nagaira.com/apis/backups/task-scheduler/$(date +'%Y%m%d_%H%M%S')"
         TARGET_DIR="${{ secrets.VPS_API_PATH }}"
