@@ -45,10 +45,11 @@ jobs:
           exit 1
         fi
 
+    # Paso 7: Realizar un backup de los archivos existentes
     - name: Backup existing files
       uses: appleboy/ssh-action@v1.2.0
       with:
-       host: ${{ secrets.VPS_IP  }}
+       host: ${{ secrets.VPS_IP }}
        username: ${{ secrets.VPS_USERNAME }}
        passphrase: ${{ secrets.SSH_PASSPHRASE }}
        key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -62,7 +63,6 @@ jobs:
         cp -r $TARGET_DIR/* $BACKUP_DIR/
         echo "Backup completado correctamente."
 
-   
     # Paso 8: Desplegar a tu VPS usando SCP
     - name: Deploy to VPS
       uses: appleboy/scp-action@v0.1.7
@@ -75,3 +75,31 @@ jobs:
         source: "/home/runner/work/Nagaira.TaskScheduler.Api/Nagaira.TaskScheduler.Api/out/*"
         target: "/var/www/nagaira.com/apis/temporary/task-scheduler"
         overwrite: true
+
+    # Paso 9: Mover archivos al directorio final
+    - name: Move files to final directory
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        port: 2222
+        script: |
+          TEMP_DIR="/var/www/nagaira.com/apis/temporary/task-scheduler/github/workspace/out"
+          FINAL_DIR="${{ secrets.VPS_API_PATH }}"
+          echo "Moviendo archivos desde $TEMP_DIR a $FINAL_DIR..."
+          
+          # Crear el directorio final si no existe
+          mkdir -p $FINAL_DIR
+
+          # Mover los archivos
+          mv $TEMP_DIR/* $FINAL_DIR/
+
+          # Verificar la operación
+          if [ "$(ls -A $FINAL_DIR)" ]; then
+            echo "Archivos movidos exitosamente a $FINAL_DIR."
+          else
+            echo "Error: El directorio $FINAL_DIR está vacío después del movimiento."
+            exit 1
+          fi
