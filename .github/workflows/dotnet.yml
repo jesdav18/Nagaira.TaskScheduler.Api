@@ -53,7 +53,7 @@ jobs:
        username: ${{ secrets.VPS_USERNAME }}
        passphrase: ${{ secrets.SSH_PASSPHRASE }}
        key: ${{ secrets.SSH_PRIVATE_KEY }}
-       port: 2222
+       port: ${{ secrets.SSH_PORT }}
        script: |
         BACKUP_DIR="/var/www/nagaira.com/apis/backups/task-scheduler/$(date +'%Y%m%d_%H%M%S')"
         TARGET_DIR="${{ secrets.VPS_API_PATH }}"
@@ -71,7 +71,7 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222
+        port: ${{ secrets.SSH_PORT }}
         source: "/home/runner/work/Nagaira.TaskScheduler.Api/Nagaira.TaskScheduler.Api/out/*"
         target: "/var/www/nagaira.com/apis/temporary/task-scheduler"
         overwrite: true
@@ -84,7 +84,7 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222
+        port: ${{ secrets.SSH_PORT }}
         script: |
           TEMP_DIR="/var/www/nagaira.com/apis/temporary/task-scheduler/github/workspace/out"
           FINAL_DIR="${{ secrets.VPS_API_PATH }}"
@@ -112,7 +112,7 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 2222
+        port: ${{ secrets.SSH_PORT }}
         script: |
           echo "Deteniendo el servicio api-task-scheduler.service..."
           sudo systemctl stop api-task-scheduler.service
