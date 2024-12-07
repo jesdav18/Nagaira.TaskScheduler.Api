@@ -39,7 +39,7 @@ jobs:
       run: |
         dotnet sonarscanner begin \
           /k:"TaskSchedulerApi" \
-          /d:sonar.host.url="http://${{ secrets.SONARQUBE_HOST }}" \
+          /d:sonar.host.url="${{ secrets.SONARQUBE_HOST }}" \
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
