@@ -21,19 +21,46 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    # Paso 3: Restaurar dependencias
+    # Paso 3: Configurar el escáner de SonarQube
+    - name: Setup SonarScanner for .NET
+      run: |
+        dotnet tool install --global dotnet-sonarscanner
+        echo "DOTNET_TOOLS_PATH=$HOME/.dotnet/tools" >> $GITHUB_ENV
+        echo "PATH=$HOME/.dotnet/tools:$PATH" >> $GITHUB_ENV
+
+    # Paso 4: Restaurar dependencias
     - name: Restore dependencies
       run: dotnet restore
 
-    # Paso 4: Construir el proyecto
+    # Paso 5: Iniciar el análisis de SonarQube
+    - name: Start SonarQube analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        dotnet sonarscanner begin \
+          /k:"TaskSchedulerApi" \
+          /d:sonar.host.url="http://${{ secrets.SONARQUBE_HOST }}" \
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+    # Paso 6: Construir el proyecto
     - name: Build
       run: dotnet build --no-restore
 
-    # Paso 5: Ejecutar pruebas
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    # Paso 7: Ejecutar pruebas con cobertura
+    - name: Test with Coverage
+      run: |
+        dotnet test --no-build --verbosity normal \
+        --collect:"XPlat Code Coverage" \
+        --results-directory ./TestResults
 
-    # Paso 6: Publicar la aplicación
+    # Paso 8: Finalizar el análisis de SonarQube
+    - name: End SonarQube analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+    # Paso 9: Publicar la aplicación
     - name: Publish
       run: |
         set -e
@@ -45,7 +72,7 @@ jobs:
           exit 1
         fi
 
-    # Paso 7: Realizar un backup de los archivos existentes
+    # Paso 10: Realizar un backup de los archivos existentes
     - name: Backup existing files
       uses: appleboy/ssh-action@v1.2.0
       with:
@@ -63,7 +90,7 @@ jobs:
         cp -r $TARGET_DIR/* $BACKUP_DIR/
         echo "Backup completado correctamente."
 
-    # Paso 8: Desplegar a tu VPS usando SCP
+    # Paso 11: Desplegar a tu VPS usando SCP
     - name: Deploy to VPS
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -76,7 +103,7 @@ jobs:
         target: "/var/www/nagaira.com/apis/temporary/task-scheduler"
         overwrite: true
 
-    # Paso 9: Mover archivos al directorio final
+    # Paso 12: Mover archivos al directorio final
     - name: Move files to final directory
       uses: appleboy/ssh-action@v1.2.0
       with:
@@ -104,7 +131,7 @@ jobs:
             exit 1
           fi
 
-    # Paso 10: Reiniciar el servicio en el VPS
+    # Paso 13: Reiniciar el servicio en el VPS
     - name: Restart API Service
       uses: appleboy/ssh-action@v1.2.0
       with:
